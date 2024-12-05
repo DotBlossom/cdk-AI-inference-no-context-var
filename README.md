@@ -18,3 +18,5 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 ![application-composer-LambdaRelStack yaml](https://github.com/user-attachments/assets/40392ef6-59dd-42d1-b40a-7fdd95fe0d6e)
 
+## 모든 origin 에 대한 요청이 모두 유효함 (통신 test 완료): 추후 alb에 inbound 제약조건 활성화
+![fafs21](https://github.com/user-attachments/assets/d42b9a47-6659-4c48-85ff-250c518948e9)
