@@ -90,7 +90,7 @@ def handler(event, context):
         response = client.converse(
             modelId=model_id,
             messages=conversation,
-            # converse에 온도, 최대 토큰, 상위 P, 상위 K 값을 넣습니다.
+            # converse config
             inferenceConfig={
                 "temperature": 0.9,  
                 "maxTokens": 2000,  
@@ -102,13 +102,13 @@ def handler(event, context):
         response_text = response["output"]["message"]["content"][0]["text"]
         print(response_text)
         
-        # API Gateway로 결과 전송
-        api_gateway_url = "" 
-        api_url = f"{api_gateway_url}{productId}"  # productId를 URL에 포함
+        # API controller로 결과 전송
+        api_ctrl_url = "" 
+        api_url = f"{api_ctrl_url}{productId}"  # productId를 URL에 포함
         headers = {'Content-Type': 'application/json'}
         response = requests.post(api_url, headers=headers, data=response_text)
         
-        # API Gateway 응답 확인
+        # API ctrl 응답 확인
         if response.status_code == 200:
             print("API Controller 요청 후 데이터 저장 성공")
         else:
