@@ -17,6 +17,8 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 ![제목 없는 다이어그sfssfsffsf램 drawio](https://github.com/user-attachments/assets/f3a41433-e258-43fc-b110-b88abef06cd0)
 
+  -굳이 넣고싶다면, DB 피어링 AWS 서비스 밖으로 뺴자, 통신구조 더 간단하게 해도 무방함 이젠 .. 
+
 ## composer set
 
 ![application-composer-CdkTestStack yaml](https://github.com/user-attachments/assets/ebcafea1-178d-4d6a-b221-50f5bc87e055)
