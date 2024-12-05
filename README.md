@@ -13,7 +13,7 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 ## 상품 정보 -> 임베딩 특성 값으로 추론 및 증강 -> Atlas DB에 저장(Only peering을 통한 접근)
 ![fafafafs](https://github.com/user-attachments/assets/f36adb21-cdaf-49e9-b5c3-7097a19edb6a)
 
-## ad
+## ad - 2주전 만든 임시자료
 
 ![제목 없는 다이어그sfssfsffsf램 drawio](https://github.com/user-attachments/assets/f3a41433-e258-43fc-b110-b88abef06cd0)
 
