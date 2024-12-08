@@ -4,6 +4,8 @@ This is a blank project for CDK development with TypeScript.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
+gpu template is added
+
 ## AI cluster abstract
 ![sts drawio (3)](https://github.com/user-attachments/assets/2d0469cb-7225-4770-bff5-5c478b78177b)
 
