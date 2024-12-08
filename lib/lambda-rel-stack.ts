@@ -46,6 +46,7 @@ export class LambdaRelStack extends cdk.Stack {
         iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonBedrockFullAccess'),
         iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonAPIGatewayInvokeFullAccess'),
         iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonEC2FullAccess'),// Bedrock 접근 권한 추가
+        iam.ManagedPolicy.fromAwsManagedPolicyName('AWSLambda_FullAccess'),
       ]
     });
 
@@ -55,7 +56,9 @@ export class LambdaRelStack extends cdk.Stack {
       handler: 'index.handler',
       code: lambda.Code.fromAsset('lambda'),
       role: lambdaRole,
-      vpc: vpc
+      functionName: 'myLambdaFunction',
+      vpc: vpc,
+      timeout: cdk.Duration.seconds(15)
     });
 
     const lambdaApi =new apigateway.LambdaRestApi(this, 'LambdaApi', {
@@ -86,14 +89,28 @@ export class LambdaRelStack extends cdk.Stack {
       vpc: vpc,
       environment: {
           MONGODB_URI: mongoUrl,
-      }});
+      },
+      timeout: cdk.Duration.seconds(15)
+    });
   
 
-    const mongoLambdaIntegration = new apigateway.LambdaIntegration(mongoLambdaFunction);
+    const mongoLambdaIntegraion = new apigateway.LambdaIntegration(mongoLambdaFunction);
     const mongoLambdaResource = apiResource.addResource('mongo');
-    mongoLambdaResource.addMethod('GET', mongoLambdaIntegration); // GET 메서드 추가
-  
+    mongoLambdaResource.addMethod('GET', mongoLambdaIntegraion);
 
+/*
+    const healthCheckFunction = new lambda.Function(this, 'healthCheckFunction', {
+      runtime: lambda.Runtime.PYTHON_3_9,
+      handler: 'index.handler',
+      code: lambda.Code.fromAsset('health'),
+      role: lambdaRole,
+      vpc: vpc,
+    });
+
+    const healthCheckLambdaIntegraion = new apigateway.LambdaIntegration(healthCheckFunction);
+    const healthCheckResource = apiResource.addResource('health');
+    healthCheckResource.addMethod('GET', healthCheckLambdaIntegraion )
+*/
     // 도메인 이름 설정
     const domainName = new apigateway.DomainName(this, 'DomainName', {
       domainName: 'lambda.dotblossom.today',
@@ -108,7 +125,6 @@ export class LambdaRelStack extends cdk.Stack {
       domainName: domainName,
       restApi: lambdaApi, 
     });
-
 
     // Route 53 A 레코드 생성
     new route53.ARecord(this, 'lambdaRecord', {
@@ -128,8 +144,13 @@ export class LambdaRelStack extends cdk.Stack {
       principal: new iam.ServicePrincipal('apigateway.amazonaws.com'),
       sourceArn: lambdaApi.arnForExecuteApi('GET','/api/mongo', 'prod') // API Gateway 실행 ARN
     });
-  
+/*
+    healthCheckFunction.addPermission('AllowAPIGatewayInvoke', {
+      principal: new iam.ServicePrincipal('apigateway.amazonaws.com'),
+      sourceArn: lambdaApi.arnForExecuteApi('GET','/api/health', 'prod')
+    });
 
+*/
 
     new cdk.CfnOutput(this, 'LambdaFunctionName' , {
       value: myLambdaFunction.functionName,
