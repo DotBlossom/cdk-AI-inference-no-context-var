@@ -4,6 +4,14 @@ This is a blank project for CDK development with TypeScript.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
+## AI cluster abstract
+![sts drawio (3)](https://github.com/user-attachments/assets/2d0469cb-7225-4770-bff5-5c478b78177b)
+
+
+## aws ac
+![제목 없는 다이dsdsfa어그램 drawio](https://github.com/user-attachments/assets/9e56f35d-c172-400f-9cb5-787811982364)
+
+
 ## 세팅
   - AI 추론 클러스터 VPC와 mongoDB VPC 피어링
   - 클러스터 VPC에서 실제 피어링단과 상호작용하는 서브넷의 라우팅 테이블을 MongoDB vpc 피어링 속성으로 추가
