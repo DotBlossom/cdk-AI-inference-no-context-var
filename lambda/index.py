@@ -9,10 +9,9 @@ model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
 def handler(event, context):
     
     try:
-        # imageURL 빼고 싹다 넣어버림 될듯?
-        json_input_clothes = event["body"] 
-        # path에서 productId 가져오기
-        productId = event["pathParameters"]["productId"] 
+        # 딕셔너리에서 값 가져오기
+        json_input_clothes= event["product_metadata_to_str"]  # json.loads() 제거
+        productId = event["product_id"]
  
     except KeyError:
         return {
@@ -90,7 +89,7 @@ def handler(event, context):
         response = client.converse(
             modelId=model_id,
             messages=conversation,
-            # converse config
+            # converse에 온도, 최대 토큰, 상위 P, 상위 K 값을 넣습니다.
             inferenceConfig={
                 "temperature": 0.9,  
                 "maxTokens": 2000,  
@@ -102,13 +101,13 @@ def handler(event, context):
         response_text = response["output"]["message"]["content"][0]["text"]
         print(response_text)
         
-        # API controller로 결과 전송
-        api_ctrl_url = "" 
-        api_url = f"{api_ctrl_url}{productId}"  # productId를 URL에 포함
+        # API Gateway로 결과 전송
+        api_gateway_url = "https://dotblossom.today/ai-api/bedrock/result/" 
+        api_url = f"{api_gateway_url}{productId}"  # productId를 URL에 포함
         headers = {'Content-Type': 'application/json'}
         response = requests.post(api_url, headers=headers, data=response_text)
         
-        # API ctrl 응답 확인
+        # API Gateway 응답 확인
         if response.status_code == 200:
             print("API Controller 요청 후 데이터 저장 성공")
         else:
@@ -127,3 +126,5 @@ def handler(event, context):
             'response_text': response_text
         })
     }
+    
+    
