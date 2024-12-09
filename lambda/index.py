@@ -9,14 +9,18 @@ model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"
 def handler(event, context):
     
     try:
+        body = json.loads(event['body']) 
         # 딕셔너리에서 값 가져오기
-        json_input_clothes= event["product_metadata_to_str"]  # json.loads() 제거
-        productId = event["product_id"]
+        json_input_clothes= body["product_metadata_to_str"]  # json.loads() 제거
+        productId = body["product_id"]
  
     except KeyError:
         return {
             'statusCode': 400,
-            'body': json.dumps({'error': 'json_input_clothes is missing in the request body'})
+            'body': json.dumps({'error': 'json_input_clothes is missing in the request body'}),
+            'headers': {
+                 "Content-Type": "application/json"
+            }
         }
 
     # 전체 프롬프트 (줄바꿈 추가)
@@ -25,8 +29,7 @@ def handler(event, context):
 {{json_input_clothes}}의 특성을 잘 반영하는 feature값을 선택하여 {{json_clothes_metadata_feature_all}} 과 동일한 양식의 json 데이터를 결과로 리턴해줘. 
 {{json_clothes_metadata_feature_all}}의 내부 키 중 하나인 "reinforced_feature_value"는  결과 에삽입되어야 하는 값이며, 
 {{json_clothes_metadata_feature_all}}의 "clothes"의 feature 값 들 중에 존재하지 않지만, {{json_input_clothes}}에 존재하는 명시적인 feature 특성이 존재한다면, "reinforced_feature_value"에 추가해줘. 
-"tsf_clothes_metadata_vector_concator"는 결과에 존재해야하는 특성이며, 결과에서 생성된 "clothes","reinforced_feature_value"을 참조하여, 옷의 특성을 가질수 있는 8차원 임베딩 벡터값을 생성해줘. 
-"tsf_context_dist_vector"는결과에 존재해야하는 특성이며, "clothes","reinforced_feature_value"에 참조되지않았지만, 옷의 명백한 특성을 설명할 수있는 문자열 형식의 설명을 리턴해줘.
+
 
  그리고 답변은 json 데이터의 결과만 리턴해줘. 
  그리고 "category"에 해당하는 값(top, pants, skirt)의 종류에 대응되는 "top.()", "pants.()", "skirt.()" 에 맞는 feature를 선택적으로 채워줘.
@@ -71,13 +74,15 @@ def handler(event, context):
                                 "category_specification": [""],
                                 "specification.metadata":[""]
             }},                         
-"tsf_clothes_metadata_vector_concator": [""],
-"tsf_context_dist_vector": [""]
+
 }}
 
 
 {{json_input_clothes}} : {json_input_clothes}
 """ 
+
+
+
     conversation = [
         {
             "role": "user",
@@ -124,7 +129,10 @@ def handler(event, context):
         'statusCode': 200,
         'body': json.dumps({
             'response_text': response_text
-        })
+        }),
+        'headers': {
+             "Content-Type": "application/json"
+        }
     }
     
     
