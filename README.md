@@ -17,6 +17,7 @@ gpu template is added
 ## 세팅
   - AI 추론 클러스터 VPC와 mongoDB VPC 피어링
   - 클러스터 VPC에서 실제 피어링단과 상호작용하는 서브넷의 라우팅 테이블을 MongoDB vpc 피어링 속성으로 추가
+  - ingress피어링도 
   - 그러한 private Subnet은, AI 추론 전용 API 단과 연결되어있어, 여기서 MongoDB와 유일통신. 중개 API를 모두 모아서 관리
 
 
