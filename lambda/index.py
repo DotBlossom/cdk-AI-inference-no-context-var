@@ -3,6 +3,9 @@ import json
 from botocore.exceptions import ClientError
 import requests
 
+
+
+
 client = boto3.client("bedrock-runtime", region_name="ap-northeast-2")
 model_id = "anthropic.claude-3-5-sonnet-20240620-v1:0"  
 
@@ -19,7 +22,10 @@ def handler(event, context):
             'statusCode': 400,
             'body': json.dumps({'error': 'json_input_clothes is missing in the request body'}),
             'headers': {
-                 "Content-Type": "application/json"
+                 "Content-Type": "application/json",
+                 "Access-Control-Allow-Origin" : "*",
+                'Access-Control-Allow-Headers': '*',
+                'Access-Control-Allow-Methods': '*'
             }
         }
 
@@ -75,7 +81,7 @@ def handler(event, context):
                                 "specification.metadata":[""]
             }},                         
 
-}}
+    }}
 
 
 {{json_input_clothes}} : {json_input_clothes}
@@ -131,7 +137,11 @@ def handler(event, context):
             'response_text': response_text
         }),
         'headers': {
-             "Content-Type": "application/json"
+             "Content-Type": "application/json",
+             "Access-Control-Allow-Origin" : "*",
+             'Access-Control-Allow-Headers': '*',
+             'Access-Control-Allow-Methods': '*'
+             
         }
     }
     
