@@ -6,6 +6,14 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 gpu template is added
 
+## Main Stacks
+![스크린샷 2024-12-14 083953](https://github.com/user-attachments/assets/1464951c-b514-490d-8bb9-e07dc4a3b1e1)
+
+
+## Lambda+Gateway Stack 
+![스크린샷 2024-12-14 084005](https://github.com/user-attachments/assets/c38a6ca4-6cc7-4a3b-9051-955157f0b233)
+
+
 ## AI cluster abstract
 ![sts drawio (3)](https://github.com/user-attachments/assets/2d0469cb-7225-4770-bff5-5c478b78177b)
 
