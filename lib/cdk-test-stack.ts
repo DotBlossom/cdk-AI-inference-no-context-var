@@ -110,7 +110,7 @@ export class CdkTestStack extends cdk.Stack {
     */
 
     const inferAsg = new AutoScalingGroup(this, "inferFleet", {
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.LARGE),
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.C5, ec2.InstanceSize.XLARGE),
       vpc: this.vpc,
       machineImage: ecs.EcsOptimizedImage.amazonLinux2023(),
       maxCapacity: 2,
@@ -122,7 +122,7 @@ export class CdkTestStack extends cdk.Stack {
       ec2.Port.allTraffic(),
       'Allow all inbound traffic'
     );
-
+/*
     const embedAsg = new AutoScalingGroup(this, "embedFleet", {
       instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.LARGE),
       vpc: this.vpc,
@@ -135,10 +135,11 @@ export class CdkTestStack extends cdk.Stack {
       ec2.Port.allTraffic(),
       'Allow all inbound traffic'
     );
+*/
 
     const controllerAsg = new AutoScalingGroup(this, "controllerFleet", {
       vpc: this.vpc,
-      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T3, ec2.InstanceSize.LARGE),
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.C5, ec2.InstanceSize.XLARGE),
       machineImage: ecs.EcsOptimizedImage.amazonLinux2023(),
       maxCapacity: 2,
       
@@ -174,7 +175,7 @@ export class CdkTestStack extends cdk.Stack {
         autoScalingGroup: inferAsg
       }
     );
-
+/*
     const embedCapacityProvider = new ecs.AsgCapacityProvider(
       this,
       "embedAsgCapacityProvider",
@@ -186,10 +187,12 @@ export class CdkTestStack extends cdk.Stack {
     );
 
     // child Stack Caller
-    ecsCluster.addAsgCapacityProvider(inferCapacityProvider);
-    ecsCluster.addAsgCapacityProvider(embedCapacityProvider);
-    ecsCluster.addAsgCapacityProvider(controllerCapacityProvider);
 
+    ecsCluster.addAsgCapacityProvider(embedCapacityProvider);
+
+*/
+    ecsCluster.addAsgCapacityProvider(controllerCapacityProvider);
+    ecsCluster.addAsgCapacityProvider(inferCapacityProvider);
     // predefallowed
 
     cdk.Aspects.of(this).add(new CapacityProviderDependencyAspect());
@@ -227,9 +230,13 @@ export class CdkTestStack extends cdk.Stack {
             removalPolicy: cdk.RemovalPolicy.RETAIN,
           }),
         }),
-        memoryLimitMiB: 256,
+        memoryLimitMiB: 4096,
         environment: {
-          MONGO_URL: this.node.tryGetContext('mongoUrl')
+          MONGO_URL: this.node.tryGetContext('mongoUrl'),
+          MONGO_URI: this.node.tryGetContext('mongoUrl'),
+          MONGO_URI_HONG: this.node.tryGetContext('mongoUrl'),
+          CUSTOM_RUN_HOST:this.node.tryGetContext('CUSTOM_RUN_HOST'),
+          CUSTOM_RUN_PORT:this.node.tryGetContext('CUSTOM_RUN_PORT')
         },
       });
 
@@ -256,7 +263,7 @@ export class CdkTestStack extends cdk.Stack {
 
       return service;
     };
-
+/*
     const createGpuBasedTaskDefinition = (name: string, containerPort: number, subnet: ec2.SubnetSelection, capacityProvider: ecs.AsgCapacityProvider, ver: number) => {
       // ECS GPU Task
       const gpuTaskExecutionRole = new iam.Role(this, "GpuTaskExecutionRole", {
@@ -324,16 +331,17 @@ export class CdkTestStack extends cdk.Stack {
 
       return service;
     };
-
-
-    const inferService = createTaskDefinition('infer', 5000, {
-      subnetGroupName: 'application-1', onePerAz: true,
-
-    }, inferCapacityProvider, 1);
+ */
+/*
 
     const embedService = createTaskDefinition('embed', 5001, {
       subnetGroupName: 'application-2', onePerAz: true,
     }, embedCapacityProvider, 2);
+*/
+    const inferService = createTaskDefinition('infer', 5000, {
+      subnetGroupName: 'application-1', onePerAz: true,
+
+    }, inferCapacityProvider, 5);
 
     const controllerService = createTaskDefinition('controller', 5050, {
       subnetGroupName: 'inference-controller-1', onePerAz: true,
@@ -353,6 +361,7 @@ export class CdkTestStack extends cdk.Stack {
     const alb = new elbv2.ApplicationLoadBalancer(this, 'ALB', {
       vpc: this.vpc,
       internetFacing: true,
+      
     });
 
     const albSecurityGroup = alb.connections.securityGroups[0];
@@ -368,7 +377,25 @@ export class CdkTestStack extends cdk.Stack {
     });
 
     aliasRecord.node.addDependency(alb);
+/*
 
+
+    // EmbedTarget 그룹 생성
+    const embedTargetGroup = new elbv2.ApplicationTargetGroup(this, 'EmbedTargetGroup', {
+      vpc: this.vpc,
+      port: 5001,
+      targets: [embedService],
+      protocol: elbv2.ApplicationProtocol.HTTP,
+      targetType: elbv2.TargetType.INSTANCE,
+      healthCheck: {
+        interval: cdk.Duration.seconds(60), // 60초 간격
+        path: "/",
+        timeout: cdk.Duration.seconds(50),
+        unhealthyThresholdCount: 5, // 5번 실패 시 비정상
+        healthyThresholdCount: 2, // 2번 성공 시 정상
+      }
+    });
+*/
     // InferTarget 그룹 생성
     const inferTargetGroup = new elbv2.ApplicationTargetGroup(this, 'InferTargetGroup', {
       vpc: this.vpc,
@@ -386,22 +413,6 @@ export class CdkTestStack extends cdk.Stack {
 
     });
 
-    // EmbedTarget 그룹 생성
-    const embedTargetGroup = new elbv2.ApplicationTargetGroup(this, 'EmbedTargetGroup', {
-      vpc: this.vpc,
-      port: 5001,
-      targets: [embedService],
-      protocol: elbv2.ApplicationProtocol.HTTP,
-      targetType: elbv2.TargetType.INSTANCE,
-      healthCheck: {
-        interval: cdk.Duration.seconds(60), // 60초 간격
-        path: "/",
-        timeout: cdk.Duration.seconds(50),
-        unhealthyThresholdCount: 5, // 5번 실패 시 비정상
-        healthyThresholdCount: 2, // 2번 성공 시 정상
-      }
-    });
-
     const controllerTargetGroup = new elbv2.ApplicationTargetGroup(this, 'ControllerTargetGroup', {
       vpc: this.vpc,
       port: 5050,
@@ -414,7 +425,8 @@ export class CdkTestStack extends cdk.Stack {
         timeout: cdk.Duration.seconds(50),
         unhealthyThresholdCount: 5, // 5번 실패 시 비정상
         healthyThresholdCount: 2, // 2번 성공 시 정상
-      }
+      },
+      
 
     });
 
@@ -438,14 +450,8 @@ export class CdkTestStack extends cdk.Stack {
         permanent: true,
       }),
     });
+/*
 
-    // InferTarget 규칙 추가
-    listener.addTargetGroups('InferTarget', {
-      targetGroups: [inferTargetGroup],
-      priority: 1,
-      conditions: [elbv2.ListenerCondition.pathPatterns(['/infer', '/infer/*'])],
-
-    });
 
     // EmbedTarget 규칙 추가
     listener.addTargetGroups('EmbedTarget', {
@@ -454,6 +460,14 @@ export class CdkTestStack extends cdk.Stack {
       conditions: [elbv2.ListenerCondition.pathPatterns(['/embed', '/embed/*'])]
     });
 
+*/
+    // InferTarget 규칙 추가
+    listener.addTargetGroups('InferTarget', {
+      targetGroups: [inferTargetGroup],
+      priority: 1,
+      conditions: [elbv2.ListenerCondition.pathPatterns(['/infer-api', '/infer-api/*'])],
+
+    });
 
     listener.addTargetGroups('ControllerTarget', {
       targetGroups: [controllerTargetGroup],
