@@ -6,6 +6,9 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
 gpu template is added
 
+### prerequisite 
+    - G and VT on Demend & Spot(비용 아끼기) vCPU Quota 할당 필요 
+
 ## Main Stacks
 ![스크린샷 2024-12-14 083953](https://github.com/user-attachments/assets/1464951c-b514-490d-8bb9-e07dc4a3b1e1)
 
